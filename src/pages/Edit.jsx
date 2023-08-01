@@ -1,8 +1,48 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import Header from "../common/Header";
 import Container from "../common/Container";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { editItem } from "../redux/modules/itemSlice";
 
 export default function Edit() {
+  const { id } = useParams();
+  // useParmas로 url에 넣어준 id를 받아온다.
+
+  // 데이터 가져오기
+  const items = useSelector((state) => state.Items);
+
+  // props 로 넘겨받은 contents 배열에서
+  // find 메서드를 사용하여 id값과 일치하는 요소만 가져온다.
+  const item = items.find((item) => {
+    return item.id === id;
+  });
+
+  // title, content 수정을 위해 useState 선언
+  // or연산자를 활용해 undefined 일때는 빈 문자열을 초기값으로
+  let initTitle = item?.title || "";
+  let initContent = item?.content || "";
+  const [title, setTitle] = useState(initTitle);
+  const [content, setContent] = useState(initContent);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // input title, content 수정사항 반영하기
+  const titleChangeHandler = (e) => {
+    setTitle(e.target.value);
+  };
+
+  const contentChangeHandler = (e) => {
+    setContent(e.target.value);
+  };
+
+  const itemEditHandler = () => {
+    // useDispatch로 변경함수 사용하기
+    // action.payload 객체로 변경된 title, content, id 보내주기
+    dispatch(editItem({ title, content, id }));
+    navigate("/");
+  };
+
   return (
     <Fragment>
       <Header />
@@ -16,12 +56,14 @@ export default function Edit() {
           }}
           onSubmit={(e) => {
             e.preventDefault();
-            console.log("제출!");
+            itemEditHandler();
           }}
         >
           <div>
             <input
-              placeholder="제목"
+              type="text"
+              // defaultValue={title}
+              value={title}
               style={{
                 width: "100%",
                 height: "60px",
@@ -31,6 +73,10 @@ export default function Edit() {
                 padding: "8px",
                 boxSizing: "border-box",
               }}
+              // onchange로 input 값 상태 변경 감지
+              onChange={(e) => {
+                titleChangeHandler(e);
+              }}
             />
           </div>
           <div
@@ -39,7 +85,8 @@ export default function Edit() {
             }}
           >
             <textarea
-              placeholder="내용"
+              type="text"
+              value={content}
               style={{
                 resize: "none",
                 height: "100%",
@@ -49,6 +96,9 @@ export default function Edit() {
                 border: "1px solid lightgrey",
                 padding: "12px",
                 boxSizing: "border-box",
+              }}
+              onChange={(e) => {
+                contentChangeHandler(e);
               }}
             />
           </div>

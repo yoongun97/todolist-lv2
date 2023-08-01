@@ -2,9 +2,24 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../common/Header";
 import Container from "../common/Container";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteItem } from "../redux/modules/itemSlice";
 
 export default function Main() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // 데이터 가져오기
+  const items = useSelector((state) => state.Items);
+
+  // item 삭제 이벤트
+  const itemDeleteHandler = (id) => {
+    if (window.confirm("삭제할까??")) {
+      // useDispatch로 변경함수 사용하기
+      // action.payload로 id 보내주기
+      dispatch(deleteItem(id));
+    }
+  };
   return (
     <>
       <Header />
@@ -32,9 +47,14 @@ export default function Main() {
             추가
           </button>
         </div>
-        {[1, 2, 3, 4].map((item) => (
+        {/* 
+        userState로 정의한 list 배열을 map함수로 펼쳐준다.
+        list 배열의 요소(객체)의 데이터를 보여주고, 배열 내의 모든 요소에 해당 과정을 반복한다. 
+        */}
+        {items.map((item) => (
           <div
-            key={item}
+            // map 내부에 고유의 key값 부여
+            key={item.id}
             style={{
               backgroundColor: "#EEEEEE",
               height: "100px",
@@ -46,7 +66,7 @@ export default function Main() {
           >
             <div
               onClick={() => {
-                navigate("/detail/1");
+                navigate(`/detail/${item.id}`);
               }}
               style={{
                 flex: 4,
@@ -54,7 +74,7 @@ export default function Main() {
                 cursor: "pointer",
               }}
             >
-              <h2>제목</h2>
+              <h2>{item.title}</h2>
               <p
                 style={{
                   width: "300px",
@@ -63,10 +83,7 @@ export default function Main() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.Lorem
-                ipsum dolor, sit amet consectetur adipisicing elit.Lorem ipsum
-                dolor, sit amet consectetur adipisicing elit.Lorem ipsum dolor,
-                sit amet consectetur adipisicing elit.
+                {item.content}
               </p>
             </div>
             <div
@@ -79,11 +96,11 @@ export default function Main() {
                 gap: "12px",
               }}
             >
-              <div>작성자</div>
+              <div>{item.author}</div>
               <div>
                 <button
                   onClick={() => {
-                    navigate("/edit");
+                    navigate(`/edit/${item.id}`);
                   }}
                   style={{
                     border: "none",
@@ -99,7 +116,8 @@ export default function Main() {
                 </button>
                 <button
                   onClick={() => {
-                    alert("삭제할까?");
+                    // 삭제할 item을 특정하기 위해 해당 버튼이 있는 item의 id를 보내준다.
+                    itemDeleteHandler(item.id);
                   }}
                   style={{
                     border: "none",
